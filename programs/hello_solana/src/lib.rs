@@ -10,7 +10,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("3sQrQZFU76P77zApJKTUhfDRy4SEZHutYUnbxMuqsYXN");
+declare_id!("9BFaK8vtFSEcrQUnK9ui4h4i2tFyiuy2ytXYBE2Fz4AE");
 
 #[program]
 pub mod hello_solana {

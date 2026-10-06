@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>IoT Sensor Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0f1115; color: #e6e6e6; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; margin-bottom: 4px; }
+  .sub { color: #888; margin-bottom: 16px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tab {
+    background: #1a1d24; border: 1px solid #2a2e37; color: #ccc;
+    padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px;
+  }
+  .tab.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+  .cards { display: flex; gap: 16px; margin-bottom: 24px; }
+  .card { background: #1a1d24; border-radius: 8px; padding: 16px 20px; min-width: 140px; }
+  .card .label { color: #888; font-size: 12px; text-transform: uppercase; }
+  .card .val { font-size: 28px; font-weight: 600; margin-top: 4px; }
+  .active { color: #4ade80; }
+  .inactive { color: #f87171; }
+  .spike { color: #fbbf24; }
+  canvas { background: #1a1d24; border-radius: 8px; padding: 16px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid #222; }
+  th { color: #888; font-weight: 500; }
+  #alerts { position: fixed; top: 16px; right: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 100; }
+  .alert {
+    background: #7c2d12; border: 1px solid #f97316; color: #fed7aa;
+    padding: 10px 16px; border-radius: 6px; font-size: 13px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    animation: slidein 0.2s ease-out;
+  }
+  @keyframes slidein { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+</style>
+</head>
+<body>
+  <div id="alerts"></div>
+
+  <h1>IoT Sensor Dashboard</h1>
+  <div class="sub" id="device-label">device: —</div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="cards">
+    <div class="card"><div class="label">Status</div><div class="val" id="status">—</div></div>
+    <div class="card"><div class="label">Total readings</div><div class="val" id="count">—</div></div>
+    <div class="card"><div class="label">Last value</div><div class="val" id="last">—</div></div>
+  </div>
+
+  <canvas id="chart" height="80"></canvas>
+
+  <table id="table">
+    <thead><tr><th>#</th><th>Value</th><th>Time</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+<script>
+const THRESHOLD_HIGH = 1000;
+let currentDevice = null;
+
+const ctx = document.getElementById('chart').getContext('2d');
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: { labels: [], datasets: [{ label: 'Reading value', data: [], borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.1)', tension: 0.25, pointRadius: 2 }] },
+  options: {
+    animation: false,
+    scales: { x: { ticks: { color: '#888' }, grid: { color: '#222' } }, y: { ticks: { color: '#888' }, grid: { color: '#222' } } },
+    plugins: { legend: { labels: { color: '#ccc' } } }
+  }
+});
+
+function showAlert(text) {
+  const el = document.createElement('div');
+  el.className = 'alert';
+  el.textContent = text;
+  document.getElementById('alerts').appendChild(el);
+  setTimeout(() => el.remove(), 6000);
+}
+
+async function loadTabs() {
+  const res = await fetch('/api/devices');
+  const devices = await res.json();
+  currentDevice = devices[0];
+
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = devices.map(d => `<div class="tab" data-device="${d}">${d}</div>`).join('');
+  updateActiveTab();
+
+  tabsEl.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentDevice = tab.dataset.device;
+      updateActiveTab();
+      refresh();
+    });
+  });
+}
+
+function updateActiveTab() {
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.device === currentDevice);
+  });
+}
+
+async function refresh() {
+  if (!currentDevice) return;
+  try {
+    const res = await fetch('/api/readings?device=' + encodeURIComponent(currentDevice));
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    document.getElementById('device-label').textContent = `device: ${data.deviceId}`;
+    const statusEl = document.getElementById('status');
+    statusEl.textContent = data.active ? 'Active' : 'Inactive';
+    statusEl.className = 'val ' + (data.active ? 'active' : 'inactive');
+    document.getElementById('count').textContent = data.readingCount;
+
+    const lastEl = document.getElementById('last');
+    lastEl.textContent = data.lastValue;
+    lastEl.className = 'val ' + (Number(data.lastValue) >= THRESHOLD_HIGH ? 'spike' : '');
+
+    chart.data.labels = data.readings.map(r => '#' + r.index);
+    chart.data.datasets[0].data = data.readings.map(r => Number(r.value));
+    chart.update();
+
+    const tbody = document.querySelector('#table tbody');
+    tbody.innerHTML = data.readings.slice().reverse().slice(0, 15).map(r => `
+      <tr>
+        <td>${r.index}</td>
+        <td style="color:${Number(r.value) >= THRESHOLD_HIGH ? '#fbbf24' : '#e6e6e6'}">${r.value}</td>
+        <td>${new Date(Number(r.timestamp) * 1000).toLocaleTimeString()}</td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function connectWebSocket() {
+  const ws = new WebSocket(`ws://${location.host}`);
+  ws.onmessage = (msg) => {
+    const data = JSON.parse(msg.data);
+    if (data.type === 'threshold_exceeded') {
+      showAlert(`⚠ ${data.deviceId} threshold exceeded: ${data.value}`);
+      if (data.deviceId === currentDevice) refresh();
+    }
+  };
+  ws.onclose = () => setTimeout(connectWebSocket, 2000);
+}
+
+loadTabs().then(refresh);
+setInterval(refresh, 3000);
+connectWebSocket();
+</script>
+</body>
+</html>

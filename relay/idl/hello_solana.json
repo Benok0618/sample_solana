@@ -1,0 +1,529 @@
+{
+  "address": "3sQrQZFU76P77zApJKTUhfDRy4SEZHutYUnbxMuqsYXN",
+  "metadata": {
+    "name": "hello_solana",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "increment",
+      "discriminator": [
+        11,
+        18,
+        104,
+        9,
+        104,
+        174,
+        59,
+        33
+      ],
+      "accounts": [
+        {
+          "name": "counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "authority",
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize",
+      "discriminator": [
+        175,
+        175,
+        109,
+        31,
+        13,
+        152,
+        155,
+        237
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "counter",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  101,
+                  114
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "register_device",
+      "discriminator": [
+        210,
+        151,
+        56,
+        68,
+        22,
+        158,
+        90,
+        193
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "device_authority"
+        },
+        {
+          "name": "device",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "device_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "device_id",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "set_device_active",
+      "discriminator": [
+        251,
+        242,
+        135,
+        9,
+        224,
+        80,
+        90,
+        253
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "signer": true
+        },
+        {
+          "name": "device",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "device_id"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "active",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "submit_reading",
+      "discriminator": [
+        195,
+        186,
+        45,
+        0,
+        106,
+        119,
+        103,
+        166
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "device_authority",
+          "signer": true
+        },
+        {
+          "name": "device",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  100,
+                  101,
+                  118,
+                  105,
+                  99,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "device_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reading",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  97,
+                  100,
+                  105,
+                  110,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "device"
+              },
+              {
+                "kind": "account",
+                "path": "device.reading_count",
+                "account": "Device"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "device_id",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "type": "i64"
+        },
+        {
+          "name": "timestamp",
+          "type": "i64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Counter",
+      "discriminator": [
+        255,
+        176,
+        4,
+        245,
+        188,
+        253,
+        124,
+        25
+      ]
+    },
+    {
+      "name": "Device",
+      "discriminator": [
+        153,
+        248,
+        23,
+        39,
+        83,
+        45,
+        68,
+        128
+      ]
+    },
+    {
+      "name": "Reading",
+      "discriminator": [
+        211,
+        174,
+        42,
+        75,
+        49,
+        201,
+        134,
+        113
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "ThresholdExceeded",
+      "discriminator": [
+        192,
+        47,
+        24,
+        62,
+        213,
+        52,
+        172,
+        48
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "Unauthorized",
+      "msg": "Only the counter authority can update this counter"
+    },
+    {
+      "code": 6001,
+      "name": "CounterOverflow",
+      "msg": "Counter has reached the maximum value"
+    },
+    {
+      "code": 6002,
+      "name": "DeviceIdTooLong",
+      "msg": "Device ID exceeds maximum length"
+    },
+    {
+      "code": 6003,
+      "name": "DeviceInactive",
+      "msg": "Device is not active"
+    },
+    {
+      "code": 6004,
+      "name": "UnauthorizedDevice",
+      "msg": "Only the device authority can submit readings"
+    },
+    {
+      "code": 6005,
+      "name": "UnauthorizedAdmin",
+      "msg": "Only the admin can perform this action"
+    }
+  ],
+  "types": [
+    {
+      "name": "Counter",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "count",
+            "type": "u64"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Device",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "active",
+            "type": "bool"
+          },
+          {
+            "name": "reading_count",
+            "type": "u64"
+          },
+          {
+            "name": "last_value",
+            "type": "i64"
+          },
+          {
+            "name": "last_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Reading",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "device",
+            "type": "pubkey"
+          },
+          {
+            "name": "value",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ThresholdExceeded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "device",
+            "type": "pubkey"
+          },
+          {
+            "name": "device_id",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "type": "i64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "COUNTER_SEED",
+      "type": "bytes",
+      "value": "[99, 111, 117, 110, 116, 101, 114]"
+    },
+    {
+      "name": "DEVICE_SEED",
+      "type": "bytes",
+      "value": "[100, 101, 118, 105, 99, 101]"
+    },
+    {
+      "name": "HELLO_WORLD_LAMPORTS",
+      "type": "u64",
+      "value": "1"
+    },
+    {
+      "name": "MAX_COUNT",
+      "type": "u64",
+      "value": "10"
+    },
+    {
+      "name": "READING_SEED",
+      "type": "bytes",
+      "value": "[114, 101, 97, 100, 105, 110, 103]"
+    },
+    {
+      "name": "THRESHOLD_HIGH",
+      "type": "i64",
+      "value": "1000"
+    },
+    {
+      "name": "THRESHOLD_LOW",
+      "type": "i64",
+      "value": "-1000"
+    }
+  ]
+}
