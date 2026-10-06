@@ -6,4 +6,12 @@ pub enum ErrorCode {
     Unauthorized,
     #[msg("Counter has reached the maximum value")]
     CounterOverflow,
+    #[msg("Device ID exceeds maximum length")]
+    DeviceIdTooLong,
+    #[msg("Device is not active")]
+    DeviceInactive,
+    #[msg("Only the device authority can submit readings")]
+    UnauthorizedDevice,
+    #[msg("Only the admin can perform this action")]
+    UnauthorizedAdmin,
 }
